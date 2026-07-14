@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>⚽ 축구 승부차기 미니게임</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background:
+                linear-gradient(
+                    rgba(0, 0, 0, 0.35),
+                    rgba(0, 0, 0, 0.55)
+                ),
+                linear-gradient(#54b5e8 0 45%, #328b42 45% 100%);
+            color: white;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 30px 20px 15px;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        header p {
+            font-size: 17px;
+            color: #f1f1f1;
+        }
+
+        .game-container {
+            width: 90%;
+            max-width: 850px;
+            margin: 20px auto 50px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 25px;
+            padding: 25px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 점수판 */
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .score-item {
+            min-width: 150px;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 15px 20px;
+            border-radius: 15px;
+        }
+
+        .score-item span {
+            display: block;
+            margin-top: 8px;
+            font-size: 27px;
+            font-weight: bold;
+            color: #ffe66d;
+        }
+
+        /* 경기장 */
+
+        .field {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            overflow: hidden;
+            border: 5px solid white;
+            border-radius: 20px;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    #2e9a45 0,
+                    #2e9a45 80px,
+                    #27893c 80px,
+                    #27893c 160px
+                );
+        }
+
+        .center-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(-50%);
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 130px;
+            height: 130px;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 골대 */
+
+        .goal {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            width: 390px;
+            height: 175px;
+            transform: translateX(-50%);
+            border: 9px solid white;
+            border-bottom: 5px solid white;
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent 24%,
+                    rgba(255, 255, 255, 0.3) 25%,
+                    transparent 26%,
+                    transparent 49%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    transparent 51%,
+                    transparent 74%,
+                    rgba(255, 255, 255, 0.3) 75%,
+                    transparent 76%
+                ),
+                linear-gradient(
+                    transparent 24%,
+                    rgba(255, 255, 255, 0.3) 25%,
+                    transparent 26%,
+                    transparent 49%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    transparent 51%,
+                    transparent 74%,
+                    rgba(255, 255, 255, 0.3) 75%,
+                    transparent 76%
+                );
+        }
+
+        /* 슛 선택 영역 */
+
+        .shoot-zone {
+            position: absolute;
+            cursor: pointer;
+            z-index: 3;
+            transition: 0.2s;
+        }
+
+        .shoot-zone:hover {
+            background: rgba(255, 230, 109, 0.25);
+        }
+
+        .left-zone {
+            top: 0;
+            left: 0;
+            width: 33.33%;
+            height: 100%;
+        }
+
+        .center-zone {
+            top: 0;
+            left: 33.33%;
+            width: 33.33%;
+            height: 100%;
+        }
+
+        .right-zone {
+            top: 0;
+            right: 0;
+            width: 33.33%;
+            height: 100%;
+        }
+
+        /* 골키퍼 */
+
+        .goalkeeper {
+            position: absolute;
+            top: 145px;
+            left: 50%;
+            z-index: 5;
+            font-size: 75px;
+            transform: translateX(-50%);
+            transition: 0.55s ease;
+            user-select: none;
+        }
+
+        .keeper-left {
+            left: 33%;
+            transform: translateX(-50%) rotate(-35deg);
+        }
+
+        .keeper-center {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .keeper-right {
+            left: 67%;
+            transform: translateX(-50%) rotate(35deg);
+        }
+
+        /* 축구공 */
+
+        .ball {
+            position: absolute;
+            left: 50%;
+            bottom: 45px;
+            z-index: 6;
+            font-size: 67px;
+            cursor: pointer;
+            transform: translateX(-50%);
+            transition: 0.65s ease;
+            user-select: none;
+            filter: drop-shadow(0 8px 5px rgba(0, 0, 0, 0.35));
+            animation: ballBounce 1.2s ease-in-out infinite;
+        }
+
+        .ball:hover {
+            font-size: 75px;
+        }
+
+        @keyframes ballBounce {
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-8px);
+            }
+        }
+
+        .shoot-left {
+            left: 37%;
+            bottom: 285px;
+            transform: translateX(-50%) scale(0.55);
+            animation: none;
+        }
+
+        .shoot-center {
+            left: 50%;
+            bottom: 285px;
+            transform: translateX(-50%) scale(0.55);
+            animation: none;
+        }
+
+        .shoot-right {
+            left: 63%;
+            bottom: 285px;
+            transform: translateX(-50%) scale(0.55);
+            animation: none;
+        }
+
+        /* 안내문 */
+
+        .message {
+            min-height: 55px;
+            margin-top: 22px;
+            font-size: 23px;
+            font-weight: bold;
+            color: #fff4a3;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            margin-top: 5px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 13px 25px;
+            margin: 7px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .start-button {
+            background: #ffe66d;
+            color: #222;
+        }
+
+        .reset-button {
+            background: #ffffff;
+            color: #222;
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 7px 13px rgba(0, 0, 0, 0.25);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        .guide {
+            margin-top: 18px;
+            color: #eeeeee;
+            line-height: 1.7;
+        }
+
+        /* 골 효과 */
+
+        .goal-text {
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            z-index: 100;
+            font-size: 80px;
+            font-weight: bold;
+            color: #ffe66d;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            animation: goalEffect 1.2s forwards;
+            text-shadow:
+                4px 4px 0 #e63946,
+                8px 8px 15px rgba(0, 0, 0, 0.45);
+        }
+
+        @keyframes goalEffect {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3);
+            }
+
+            40% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.25);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -70%) scale(1);
+            }
+        }
+
+        /* 모바일 */
+
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+
+            header h1 {
+                font-size: 29px;
+            }
+
+            .game-container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .field {
+                height: 430px;
+            }
+
+            .goal {
+                width: 88%;
+                height: 165px;
+            }
+
+            .goalkeeper {
+                font-size: 62px;
+            }
+
+            .ball {
+                font-size: 58px;
+            }
+
+            .score-item {
+                min-width: 105px;
+                padding: 12px;
+            }
+
+            .goal-text {
+                font-size: 55px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>⚽ 승부차기 챌린지</h1>
+    <p>골키퍼를 피해 멋진 골을 넣어보세요!</p>
+</header>
+
+<main class="game-container">
+
+    <section class="score-board">
+        <div class="score-item">
+            ⚽ 점수
+            <span id="score">0</span>
+        </div>
+
+        <div class="score-item">
+            ❤️ 남은 기회
+            <span id="life">5</span>
+        </div>
+
+        <div class="score-item">
+            🏆 최고 점수
+            <span id="bestScore">0</span>
+        </div>
+    </section>
+
+    <section class="field">
+
+        <div class="center-line"></div>
+        <div class="center-circle"></div>
+
+        <div class="goal">
+            <div
+                class="shoot-zone left-zone"
+                onclick="shoot('left')"
+                title="왼쪽으로 슛">
+            </div>
+
+            <div
+                class="shoot-zone center-zone"
+                onclick="shoot('center')"
+                title="가운데로 슛">
+            </div>
+
+            <div
+                class="shoot-zone right-zone"
+                onclick="shoot('right')"
+                title="오른쪽으로 슛">
+            </div>
+        </div>
+
+        <div id="goalkeeper" class="goalkeeper">
+            🧤
+        </div>
+
+        <div id="ball" class="ball" onclick="selectBall()">
+            ⚽
+        </div>
+
+    </section>
+
+    <div id="message" class="message">
+        게임 시작 버튼을 눌러주세요!
+    </div>
+
+    <div class="controls">
+        <button
+            id="startButton"
+            class="start-button"
+            onclick="startGame()">
+            ▶ 게임 시작
+        </button>
+
+        <button
+            class="reset-button"
+            onclick="resetGame()">
+            🔄 초기화
+        </button>
+    </div>
+
+    <div class="guide">
+        ① 게임 시작을 누릅니다.<br>
+        ② 축구공을 클릭합니다.<br>
+        ③ 골대의 왼쪽·가운데·오른쪽 중 하나를 클릭합니다.
+    </div>
+
+</main>
+
+<script>
+    let score = 0;
+    let life = 5;
+    let bestScore = Number(localStorage.getItem("soccerBestScore")) || 0;
+
+    let gameStarted = false;
+    let ballSelected = false;
+    let isShooting = false;
+
+    const scoreElement = document.getElementById("score");
+    const lifeElement = document.getElementById("life");
+    const bestScoreElement = document.getElementById("bestScore");
+    const messageElement = document.getElementById("message");
+    const goalkeeper = document.getElementById("goalkeeper");
+    const ball = document.getElementById("ball");
+    const startButton = document.getElementById("startButton");
+
+    bestScoreElement.innerText = bestScore;
+
+    function startGame() {
+        score = 0;
+        life = 5;
+
+        gameStarted = true;
+        ballSelected = false;
+        isShooting = false;
+
+        scoreElement.innerText = score;
+        lifeElement.innerText = life;
+
+        messageElement.innerText =
+            "⚽ 축구공을 클릭한 뒤 슛 방향을 선택하세요!";
+
+        startButton.innerText = "게임 진행 중";
+        startButton.disabled = true;
+
+        resetPosition();
+    }
+
+    function selectBall() {
+        if (!gameStarted) {
+            messageElement.innerText =
+                "먼저 게임 시작 버튼을 눌러주세요!";
+            return;
+        }
+
+        if (isShooting) {
+            return;
+        }
+
+        ballSelected = true;
+
+        messageElement.innerText =
+            "🔥 골대의 왼쪽, 가운데, 오른쪽을 클릭하세요!";
+    }
+
+    function shoot(direction) {
+        if (!gameStarted) {
+            messageElement.innerText =
+                "먼저 게임 시작 버튼을 눌러주세요!";
+            return;
+        }
+
+        if (!ballSelected) {
+            messageElement.innerText =
+                "먼저 축구공을 클릭하세요!";
+            return;
+        }
+
+        if (isShooting) {
+            return;
+        }
+
+        isShooting = true;
+
+        const directions = ["left", "center", "right"];
+        const keeperDirection =
+            directions[Math.floor(Math.random() * directions.length)];
+
+        goalkeeper.className =
+            "goalkeeper keeper-" + keeperDirection;
+
+        ball.className =
+            "ball shoot-" + direction;
+
+        setTimeout(function () {
+            if (direction === keeperDirection) {
+                life--;
+
+                lifeElement.innerText = life;
+
+                messageElement.innerText =
+                    "🧤 골키퍼가 막았습니다!";
+            } else {
+                score++;
+
+                scoreElement.innerText = score;
+
+                messageElement.innerText =
+                    "⚽ 골입니다! 멋진 슛이에요!";
+
+                showGoalEffect();
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestScoreElement.innerText = bestScore;
+
+                    localStorage.setItem(
+                        "soccerBestScore",
+                        bestScore
+                    );
+                }
+            }
+
+            if (life <= 0) {
+                endGame();
+                return;
+            }
+
+            setTimeout(function () {
+                resetPosition();
+
+                messageElement.innerText =
+                    "다시 공을 클릭하고 슛 방향을 선택하세요!";
+            }, 900);
+
+        }, 650);
+    }
+
+    function resetPosition() {
+        ball.className = "ball";
+        goalkeeper.className = "goalkeeper keeper-center";
+
+        ballSelected = false;
+        isShooting = false;
+    }
+
+    function showGoalEffect() {
+        const goalText = document.createElement("div");
+
+        goalText.className = "goal-text";
+        goalText.innerText = "GOAL!";
+
+        document.body.appendChild(goalText);
+
+        setTimeout(function () {
+            goalText.remove();
+        }, 1200);
+    }
+
+    function endGame() {
+        gameStarted = false;
+        ballSelected = false;
+        isShooting = false;
+
+        messageElement.innerText =
+            "🏁 게임 종료! 최종 점수는 " + score + "점입니다.";
+
+        startButton.disabled = false;
+        startButton.innerText = "▶ 다시 시작";
+    }
+
+    function resetGame() {
+        score = 0;
+        life = 5;
+
+        gameStarted = false;
+        ballSelected = false;
+        isShooting = false;
+
+        scoreElement.innerText = score;
+        lifeElement.innerText = life;
+
+        messageElement.innerText =
+            "게임 시작 버튼을 눌러주세요!";
+
+        startButton.disabled = false;
+        startButton.innerText = "▶ 게임 시작";
+
+        resetPosition();
+    }
+</script>
+
+</body>
+</html>
