@@ -218,7 +218,7 @@
             transform: translateX(-50%) rotate(35deg);
         }
 
-        /* 축구공 */
+        /* 축구공 스타일 - 완벽한 비율로 반응하는 벡터 유지를 위해 폰트 크기 비례 기법 유지 */
 
         .ball {
             position: absolute;
@@ -226,11 +226,16 @@
             bottom: 45px;
             z-index: 6;
             font-size: 67px;
+            width: 1em;
+            height: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transform: translateX(-50%);
             transition: 0.65s ease;
             user-select: none;
-            filter: drop-shadow(0 8px 5px rgba(0, 0, 0, 0.35));
+            filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.4));
             animation: ballBounce 1.2s ease-in-out infinite;
         }
 
@@ -252,21 +257,21 @@
         .shoot-left {
             left: 37%;
             bottom: 285px;
-            transform: translateX(-50%) scale(0.55);
+            transform: translateX(-50%) scale(0.55) rotate(-360deg);
             animation: none;
         }
 
         .shoot-center {
             left: 50%;
             bottom: 285px;
-            transform: translateX(-50%) scale(0.55);
+            transform: translateX(-50%) scale(0.55) rotate(360deg);
             animation: none;
         }
 
         .shoot-right {
             left: 63%;
             bottom: 285px;
-            transform: translateX(-50%) scale(0.55);
+            transform: translateX(-50%) scale(0.55) rotate(360deg);
             animation: none;
         }
 
@@ -458,8 +463,73 @@
             🧤
         </div>
 
+        <!-- 3D 광원 효과와 5축 회전 대칭을 완벽히 적용한 프리미엄 클래식 흑백 축구공 -->
         <div id="ball" class="ball" onclick="selectBall()">
-            ⚽
+            <svg viewBox="0 0 100 100" style="width: 1em; height: 1em; display: block;">
+                <defs>
+                    <!-- 3D 구체 느낌을 내기 위한 입체적 광원 그라데이션 -->
+                    <radialGradient id="ball3D" cx="35%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="#ffffff"/>
+                        <stop offset="60%" stop-color="#eeeeee"/>
+                        <stop offset="85%" stop-color="#cccccc"/>
+                        <stop offset="100%" stop-color="#999999"/>
+                    </radialGradient>
+                    
+                    <!-- 가죽 질감 느낌을 내는 진한 카본 블랙 그라데이션 -->
+                    <radialGradient id="blackPanel" cx="45%" cy="45%" r="60%">
+                        <stop offset="0%" stop-color="#2d2d2d"/>
+                        <stop offset="100%" stop-color="#111111"/>
+                    </radialGradient>
+                    
+                    <!-- 검은색 가죽 패널 전용 그림자 필터 -->
+                    <filter id="panelDepth" x="-10%" y="-10%" width="120%" height="120%">
+                        <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000000" flood-opacity="0.3"/>
+                    </filter>
+                </defs>
+
+                <!-- 기본 흰색 구체 베이스 -->
+                <circle cx="50" cy="50" r="46" fill="url(#ball3D)" stroke="#111111" stroke-width="2.2" />
+
+                <!-- 중앙 정오각형 가죽 패널 -->
+                <polygon points="50,35 64.27,45.36 58.82,62.14 41.18,62.14 35.73,45.36" fill="url(#blackPanel)" stroke="#111111" stroke-width="1.8" filter="url(#panelDepth)" />
+
+                <!-- 기하학적 5회전 대칭 구조를 이용해 그린 5개의 정교한 주변 패널 및 재봉선 -->
+                <g id="classicPanels">
+                    <!-- 1번째 방향 패널 및 라인 -->
+                    <g transform="rotate(0, 50, 50)">
+                        <line x1="50" y1="35" x2="50" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M 50,21 L 34.3,6.8 A 46 46 0 0 1 65.7,6.8 Z" fill="url(#blackPanel)" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />
+                        <line x1="34.3" y1="6.8" x2="35.73" y2="45.36" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                    </g>
+                    <!-- 2번째 방향 패널 및 라인 -->
+                    <g transform="rotate(72, 50, 50)">
+                        <line x1="50" y1="35" x2="50" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M 50,21 L 34.3,6.8 A 46 46 0 0 1 65.7,6.8 Z" fill="url(#blackPanel)" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />
+                        <line x1="34.3" y1="6.8" x2="35.73" y2="45.36" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                    </g>
+                    <!-- 3번째 방향 패널 및 라인 -->
+                    <g transform="rotate(144, 50, 50)">
+                        <line x1="50" y1="35" x2="50" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M 50,21 L 34.3,6.8 A 46 46 0 0 1 65.7,6.8 Z" fill="url(#blackPanel)" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />
+                        <line x1="34.3" y1="6.8" x2="35.73" y2="45.36" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                    </g>
+                    <!-- 4번째 방향 패널 및 라인 -->
+                    <g transform="rotate(216, 50, 50)">
+                        <line x1="50" y1="35" x2="50" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M 50,21 L 34.3,6.8 A 46 46 0 0 1 65.7,6.8 Z" fill="url(#blackPanel)" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />
+                        <line x1="34.3" y1="6.8" x2="35.73" y2="45.36" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                    </g>
+                    <!-- 5번째 방향 패널 및 라인 -->
+                    <g transform="rotate(288, 50, 50)">
+                        <line x1="50" y1="35" x2="50" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                        <path d="M 50,21 L 34.3,6.8 A 46 46 0 0 1 65.7,6.8 Z" fill="url(#blackPanel)" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />
+                        <line x1="34.3" y1="6.8" x2="35.73" y2="45.36" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+                    </g>
+                </g>
+
+                <!-- 구체감을 한층 더 끌어올리는 상단 하이라이트 투명 반사광 -->
+                <path d="M 15,30 A 38 38 0 0 1 85,30 A 46 46 0 0 0 15,30 Z" fill="#ffffff" opacity="0.16" pointer-events="none" />
+            </svg>
         </div>
 
     </section>
